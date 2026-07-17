@@ -1,5 +1,7 @@
 import type { ButtonHTMLAttributes } from 'react'
 import type { LucideIcon } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import type { To } from 'react-router-dom'
 
 export type ButtonVariant = 'primary' | 'accent' | 'outline' | 'ghost'
 export type ButtonSize = 'sm' | 'md' | 'lg'
@@ -8,6 +10,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
   size?: ButtonSize
   icon?: LucideIcon
+  /** When set, the button renders as a react-router Link instead of a button. */
+  to?: To
 }
 
 const base =
@@ -33,6 +37,7 @@ export function Button({
   variant = 'primary',
   size = 'md',
   icon: Icon,
+  to,
   className,
   children,
   type = 'button',
@@ -42,10 +47,24 @@ export function Button({
     .filter(Boolean)
     .join(' ')
 
-  return (
-    <button type={type} className={classes} {...props}>
+  const content = (
+    <>
       {Icon ? <Icon size={16} strokeWidth={1.75} aria-hidden /> : null}
       {children}
+    </>
+  )
+
+  if (to !== undefined) {
+    return (
+      <Link to={to} className={classes}>
+        {content}
+      </Link>
+    )
+  }
+
+  return (
+    <button type={type} className={classes} {...props}>
+      {content}
     </button>
   )
 }

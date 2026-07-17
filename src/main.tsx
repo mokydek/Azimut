@@ -10,6 +10,8 @@ import '@shared/styles/globals.css'
 
 const LandingPage = lazy(() => import('@landing/pages/LandingPage'))
 const AppHome = lazy(() => import('@frontend/pages/AppHome'))
+// replaced in phase 5
+const AuthPlaceholder = lazy(() => import('@frontend/pages/AuthPlaceholder'))
 // internal page, will be removed before deployment
 const Styleguide = lazy(() => import('@frontend/pages/Styleguide'))
 
@@ -20,6 +22,8 @@ createRoot(document.getElementById('root')!).render(
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/app" element={<AppHome />} />
+          {/* replaced in phase 5 */}
+          <Route path="/auth" element={<AuthPlaceholder />} />
           {/* internal page, will be removed before deployment */}
           <Route path="/styleguide" element={<Styleguide />} />
         </Routes>

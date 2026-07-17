@@ -18,6 +18,10 @@
 }
 
 /* Global base styles */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-body);
   color: var(--color-ink);
