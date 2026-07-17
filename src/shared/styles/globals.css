@@ -1,10 +1,35 @@
 @import "tailwindcss";
 
-/* Minimal base: white background, near black text, antialiased rendering. */
-html,
+@theme {
+  /* Color tokens */
+  --color-ink: #111111;
+  --color-muted: #666666;
+  --color-border: #e5e5e5;
+  --color-surface: #fafafa;
+  --color-accent: #002FA7;
+  --color-accent-hover: #00238a;
+
+  /* Typography tokens */
+  --font-heading: "Space Grotesk", sans-serif;
+  --font-body: "Archivo", sans-serif;
+
+  /* Radius token */
+  --radius-base: 2px;
+}
+
+/* Global base styles */
 body {
+  font-family: var(--font-body);
+  color: var(--color-ink);
   background-color: #ffffff;
-  color: #111111;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
 }
