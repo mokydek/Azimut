@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+/* Minimal base: white background, near black text, antialiased rendering. */
+html,
+body {
+  background-color: #ffffff;
+  color: #111111;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
