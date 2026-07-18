@@ -1,8 +1,8 @@
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '@backend/supabaseClient'
+import type { ServiceResult } from './result'
 
-// Every service function returns a discriminated result. Callers narrow with `'error' in result`.
-export type ServiceResult<T> = { data: T } | { error: string }
+export type { ServiceResult }
 
 interface AuthErrorLike {
   message?: string

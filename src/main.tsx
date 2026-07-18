@@ -12,8 +12,14 @@ import { ProtectedRoute } from '@frontend/auth/ProtectedRoute'
 import { GuestRoute } from '@frontend/auth/GuestRoute'
 
 const LandingPage = lazy(() => import('@landing/pages/LandingPage'))
-const AppHome = lazy(() => import('@frontend/pages/AppHome'))
 const AuthPage = lazy(() => import('@frontend/pages/AuthPage'))
+const AppLayout = lazy(() => import('@frontend/layout/AppLayout'))
+const Dashboard = lazy(() => import('@frontend/pages/Dashboard'))
+const AssessmentPlaceholder = lazy(
+  () => import('@frontend/modules/assessment/pages/AssessmentPlaceholder'),
+)
+const RoadmapPlaceholder = lazy(() => import('@frontend/modules/roadmap/pages/RoadmapPlaceholder'))
+const TrackerPlaceholder = lazy(() => import('@frontend/modules/tracker/pages/TrackerPlaceholder'))
 // internal page, will be removed before deployment
 const Styleguide = lazy(() => import('@frontend/pages/Styleguide'))
 
@@ -25,14 +31,6 @@ createRoot(document.getElementById('root')!).render(
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route
-              path="/app"
-              element={
-                <ProtectedRoute>
-                  <AppHome />
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/auth"
               element={
                 <GuestRoute>
@@ -40,6 +38,19 @@ createRoot(document.getElementById('root')!).render(
                 </GuestRoute>
               }
             />
+            <Route
+              path="/app"
+              element={
+                <ProtectedRoute>
+                  <AppLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Dashboard />} />
+              <Route path="assessment" element={<AssessmentPlaceholder />} />
+              <Route path="roadmap" element={<RoadmapPlaceholder />} />
+              <Route path="tracker" element={<TrackerPlaceholder />} />
+            </Route>
             {/* internal page, will be removed before deployment */}
             <Route path="/styleguide" element={<Styleguide />} />
           </Routes>
