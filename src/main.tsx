@@ -16,7 +16,7 @@ const AuthPage = lazy(() => import('@frontend/pages/AuthPage'))
 const AppLayout = lazy(() => import('@frontend/layout/AppLayout'))
 const Dashboard = lazy(() => import('@frontend/pages/Dashboard'))
 const AssessmentPage = lazy(() => import('@frontend/modules/assessment/pages/AssessmentPage'))
-const RoadmapPlaceholder = lazy(() => import('@frontend/modules/roadmap/pages/RoadmapPlaceholder'))
+const RoadmapPage = lazy(() => import('@frontend/modules/roadmap/pages/RoadmapPage'))
 const TrackerPlaceholder = lazy(() => import('@frontend/modules/tracker/pages/TrackerPlaceholder'))
 // internal page, will be removed before deployment
 const Styleguide = lazy(() => import('@frontend/pages/Styleguide'))
@@ -46,7 +46,7 @@ createRoot(document.getElementById('root')!).render(
             >
               <Route index element={<Dashboard />} />
               <Route path="assessment" element={<AssessmentPage />} />
-              <Route path="roadmap" element={<RoadmapPlaceholder />} />
+              <Route path="roadmap" element={<RoadmapPage />} />
               <Route path="tracker" element={<TrackerPlaceholder />} />
             </Route>
             {/* internal page, will be removed before deployment */}
