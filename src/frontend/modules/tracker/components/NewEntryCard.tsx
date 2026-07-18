@@ -88,6 +88,7 @@ export function NewEntryCard({ todaysEntry, onAdded }: NewEntryCardProps) {
       <textarea
         value={body}
         onChange={(event) => setBody(event.target.value)}
+        aria-label="Текст записи"
         placeholder="Что происходит? Пара строк по желанию"
         className="mt-4 min-h-[80px] w-full resize-none rounded-[2px] border border-border bg-white px-3 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-muted focus:border-ink"
       />

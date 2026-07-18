@@ -1,32 +1,42 @@
-# React + TypeScript + Vite
+# Azimut
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Azimut is a web service that turns the fear of AI driven job loss into a calm, personal
+adaptation plan. It has three parts: a profession risk assessment that estimates how exposed
+your work is to automation, an adaptation roadmap of durable skills generated from that
+assessment, and a calm tracker, a lightweight mood and reflection journal that helps you see
+your progress over time instead of a sense of chaos.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React with TypeScript
+- Vite
+- Tailwind CSS v4
+- Supabase (authentication, Postgres database, row level security)
 
-## React Compiler
+## Local setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Clone the repository and enter the project directory.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create your local environment file from the template and fill in your Supabase project values:
+   ```bash
+   cp .env.example .env.local
+   ```
+   Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env.local`.
+4. Apply the database schema. Open the Supabase SQL Editor for your project and run the files in
+   `supabase/migrations` in order:
+   1. `001_init.sql` (tables, row level security, seeded professions)
+   2. `002_profile_name.sql` (profile name trigger)
+5. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-## Expanding the Oxlint configuration
+## Scripts
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+- `npm run dev` starts the Vite development server.
+- `npm run build` type checks and builds the production bundle.
+- `npm run preview` serves the production build locally.
+- `npm run test` runs the engine test suites with Vitest.

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@shared/ui'
+import { useDocumentTitle } from '@shared/useDocumentTitle'
 import type { Profession } from '@backend/types/database'
 import { riskCategory } from '@backend/engine/riskEngine'
 import { getLatestAssessment, getProfessions } from '@backend/services/assessmentService'
@@ -21,6 +22,7 @@ function toResultView(latest: LatestAssessment): AssessmentResultView {
 }
 
 export default function AssessmentPage() {
+  useDocumentTitle('Диагностика · Azimut')
   const [phase, setPhase] = useState<Phase>('loading')
   const [result, setResult] = useState<AssessmentResultView | null>(null)
   const [professions, setProfessions] = useState<Profession[]>([])

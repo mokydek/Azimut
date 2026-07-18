@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Compass } from 'lucide-react'
 import { Button, Card, Input } from '@shared/ui'
+import { useDocumentTitle } from '@shared/useDocumentTitle'
 import { signInWithEmail, signUpWithEmail } from '@backend/services/authService'
 
 type Mode = 'signin' | 'signup'
@@ -18,6 +19,7 @@ function isValidEmail(value: string): boolean {
 }
 
 export default function AuthPage() {
+  useDocumentTitle('Вход · Azimut')
   const navigate = useNavigate()
   const [mode, setMode] = useState<Mode>('signin')
   const [fullName, setFullName] = useState('')

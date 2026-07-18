@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Badge, Button, Card } from '@shared/ui'
 import { useAuth } from '@frontend/auth/AuthProvider'
+import { useDocumentTitle } from '@shared/useDocumentTitle'
 import { getOverview } from '@backend/services/dashboardService'
 import type { OverviewData } from '@backend/services/dashboardService'
 
@@ -43,6 +44,7 @@ function SkeletonCard() {
 }
 
 export default function Dashboard() {
+  useDocumentTitle('Обзор · Azimut')
   const { user } = useAuth()
   const [data, setData] = useState<OverviewData | null>(null)
   const [loading, setLoading] = useState(true)

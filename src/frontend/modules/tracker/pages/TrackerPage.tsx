@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@shared/ui'
+import { useDocumentTitle } from '@shared/useDocumentTitle'
 import { deleteEntry, getEntries } from '@backend/services/journalService'
 import type { JournalEntryView } from '@backend/services/journalService'
 import { NewEntryCard } from '../components/NewEntryCard'
@@ -11,6 +12,7 @@ import { todaysEntry } from '../stats'
 type Phase = 'loading' | 'error' | 'ready'
 
 export default function TrackerPage() {
+  useDocumentTitle('Трекер · Azimut')
   const [entries, setEntries] = useState<JournalEntryView[]>([])
   const [phase, setPhase] = useState<Phase>('loading')
   const [actionError, setActionError] = useState<string | null>(null)

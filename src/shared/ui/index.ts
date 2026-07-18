@@ -12,3 +12,5 @@ export type { ContainerProps } from './Container'
 
 export { Badge } from './Badge'
 export type { BadgeProps, BadgeVariant } from './Badge'
+
+export { ErrorBoundary } from './ErrorBoundary'

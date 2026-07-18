@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Radar } from 'lucide-react'
 import { Badge, Button, Card } from '@shared/ui'
+import { useDocumentTitle } from '@shared/useDocumentTitle'
 import { deriveFocusAreas, riskCategory } from '@backend/engine/riskEngine'
 import type { RiskCategory } from '@backend/engine/riskEngine'
 import { getLatestAssessment } from '@backend/services/assessmentService'
@@ -18,6 +19,7 @@ const categoryLabels: Record<RiskCategory, string> = {
 }
 
 export default function RoadmapPage() {
+  useDocumentTitle('План · Azimut')
   const [phase, setPhase] = useState<Phase>('loading')
   const [assessment, setAssessment] = useState<LatestAssessment | null>(null)
   const [roadmap, setRoadmap] = useState<RoadmapView | null>(null)

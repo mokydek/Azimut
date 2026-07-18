@@ -5,8 +5,11 @@ import { Modules } from '@landing/components/Modules'
 import { Manifesto } from '@landing/components/Manifesto'
 import { FinalCta } from '@landing/components/FinalCta'
 import { LandingFooter } from '@landing/components/LandingFooter'
+import { useDocumentTitle } from '@shared/useDocumentTitle'
 
 export default function LandingPage() {
+  useDocumentTitle('Azimut')
+
   return (
     <div className="min-h-screen bg-white">
       <LandingHeader />
