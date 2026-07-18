@@ -1,27 +1,29 @@
 import type { Profession } from '@backend/types/database'
-import type { Answers, BreakdownFactor } from '@backend/engine/riskEngine'
+import type { AnswersV2, ResultV2 } from '@backend/engine/riskEngineV2'
 import { supabase } from '@backend/supabaseClient'
 import type { ServiceResult } from './result'
 
 export interface SaveAssessmentInput {
   professionId: number
-  answers: Answers
+  answers: AnswersV2
   riskScore: number
-  breakdown: BreakdownFactor[]
+  breakdown: ResultV2
 }
 
+// answers and breakdown are jsonb and may be either the v1 or v2 shape. Callers
+// narrow with the version guards from the engine.
 export interface LatestAssessment {
   score: number
-  answers: Answers
-  breakdown: BreakdownFactor[]
+  answers: unknown
+  breakdown: unknown
   professionName: string | null
   createdAt: string
 }
 
 interface LatestAssessmentRow {
   risk_score: number
-  answers: Answers
-  breakdown: BreakdownFactor[]
+  answers: unknown
+  breakdown: unknown
   created_at: string
   professions: { name: string } | { name: string }[] | null
 }

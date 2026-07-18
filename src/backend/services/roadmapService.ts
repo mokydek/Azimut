@@ -1,5 +1,6 @@
 import type { Answers } from '@backend/engine/riskEngine'
 import { deriveFocusAreas, riskCategory } from '@backend/engine/riskEngine'
+import { deriveFocusAreasV2, isAnswersV2 } from '@backend/engine/riskEngineV2'
 import { generateRoadmapSteps } from '@backend/engine/roadmapEngine'
 import { supabase } from '@backend/supabaseClient'
 import type { ServiceResult } from './result'
@@ -81,11 +82,26 @@ export async function generateRoadmap(): Promise<ServiceResult<null>> {
     return { error: 'Сначала пройдите диагностику' }
   }
 
-  const row = assessment as { id: string; risk_score: number; answers: Answers }
+  const row = assessment as { id: string; risk_score: number; answers: unknown }
+
+  // Version 2 assessments carry a different answers shape; derive the roadmap
+  // input accordingly, keeping the v1 path for older assessments.
+  let focusAreaIds: string[]
+  let aiuse: number
+  if (isAnswersV2(row.answers)) {
+    const derived = deriveFocusAreasV2(row.answers)
+    focusAreaIds = derived.focusAreas.map((area) => area.id)
+    aiuse = derived.aiuse
+  } else {
+    const legacy = row.answers as Answers
+    focusAreaIds = deriveFocusAreas(legacy).map((area) => area.id)
+    aiuse = legacy.aiuse
+  }
+
   const steps = generateRoadmapSteps({
     category: riskCategory(row.risk_score),
-    focusAreas: deriveFocusAreas(row.answers).map((area) => area.id),
-    aiuse: row.answers.aiuse,
+    focusAreas: focusAreaIds,
+    aiuse,
   })
 
   // Remove any existing roadmap first; the cascade drops its steps.

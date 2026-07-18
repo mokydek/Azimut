@@ -3,7 +3,8 @@ import { Radar } from 'lucide-react'
 import { Badge, Button, Card } from '@shared/ui'
 import { useDocumentTitle } from '@shared/useDocumentTitle'
 import { deriveFocusAreas, riskCategory } from '@backend/engine/riskEngine'
-import type { RiskCategory } from '@backend/engine/riskEngine'
+import type { Answers, RiskCategory } from '@backend/engine/riskEngine'
+import { deriveFocusAreasV2, isAnswersV2 } from '@backend/engine/riskEngineV2'
 import { getLatestAssessment } from '@backend/services/assessmentService'
 import type { LatestAssessment } from '@backend/services/assessmentService'
 import { generateRoadmap, getRoadmapWithSteps } from '@backend/services/roadmapService'
@@ -102,7 +103,9 @@ export default function RoadmapPage() {
   }
 
   if (phase === 'ready' && assessment) {
-    const focusAreas = deriveFocusAreas(assessment.answers)
+    const focusAreas = isAnswersV2(assessment.answers)
+      ? deriveFocusAreasV2(assessment.answers).focusAreas
+      : deriveFocusAreas(assessment.answers as Answers)
     const category = riskCategory(assessment.score)
     return (
       <Card className="mx-auto w-full max-w-[640px]">
@@ -113,18 +116,20 @@ export default function RoadmapPage() {
             {categoryLabels[category]}
           </Badge>
         </div>
-        <div className="mt-5">
-          <div className="text-[12px] uppercase tracking-[0.08em] text-muted">
-            Над чем будем работать
+        {focusAreas.length > 0 ? (
+          <div className="mt-5">
+            <div className="text-[12px] uppercase tracking-[0.08em] text-muted">
+              Над чем будем работать
+            </div>
+            <ul className="mt-2 flex flex-col gap-1">
+              {focusAreas.map((area) => (
+                <li key={area.id} className="text-sm text-ink">
+                  {area.label}
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="mt-2 flex flex-col gap-1">
-            {focusAreas.map((area) => (
-              <li key={area.id} className="text-sm text-ink">
-                {area.label}
-              </li>
-            ))}
-          </ul>
-        </div>
+        ) : null}
         {generateError ? (
           <p className="mt-4 text-[13px] text-[#b42318]">{generateError}</p>
         ) : null}

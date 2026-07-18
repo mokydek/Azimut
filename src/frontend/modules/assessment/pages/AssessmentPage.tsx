@@ -2,29 +2,23 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@shared/ui'
 import { useDocumentTitle } from '@shared/useDocumentTitle'
 import type { Profession } from '@backend/types/database'
-import { riskCategory } from '@backend/engine/riskEngine'
+import type { ResultV2 } from '@backend/engine/riskEngineV2'
+import { isResultV2 } from '@backend/engine/riskEngineV2'
 import { getLatestAssessment, getProfessions } from '@backend/services/assessmentService'
-import type { LatestAssessment } from '@backend/services/assessmentService'
-import { AssessmentWizard } from '../components/AssessmentWizard'
-import { ResultsView } from '../components/ResultsView'
-import type { AssessmentResultView } from '../components/ResultsView'
+import { AssessmentWizardV2 } from '../components/AssessmentWizardV2'
+import { ResultsViewV2 } from '../components/ResultsViewV2'
+import { LegacyResultsView } from '../components/LegacyResultsView'
 
 type Phase = 'loading' | 'wizard' | 'results' | 'error'
 
-function toResultView(latest: LatestAssessment): AssessmentResultView {
-  return {
-    score: latest.score,
-    category: riskCategory(latest.score),
-    breakdown: latest.breakdown,
-    professionName: latest.professionName,
-    createdAt: latest.createdAt,
-  }
-}
+type Display =
+  | { kind: 'v2'; result: ResultV2; professionName: string | null; createdAt: string }
+  | { kind: 'legacy'; score: number; professionName: string | null; createdAt: string }
 
 export default function AssessmentPage() {
   useDocumentTitle('Диагностика · Azimut')
   const [phase, setPhase] = useState<Phase>('loading')
-  const [result, setResult] = useState<AssessmentResultView | null>(null)
+  const [display, setDisplay] = useState<Display | null>(null)
   const [professions, setProfessions] = useState<Profession[]>([])
 
   const init = useCallback(async () => {
@@ -36,7 +30,22 @@ export default function AssessmentPage() {
       return
     }
     if (latest.data) {
-      setResult(toResultView(latest.data))
+      const data = latest.data
+      if (isResultV2(data.breakdown)) {
+        setDisplay({
+          kind: 'v2',
+          result: data.breakdown,
+          professionName: data.professionName,
+          createdAt: data.createdAt,
+        })
+      } else {
+        setDisplay({
+          kind: 'legacy',
+          score: data.score,
+          professionName: data.professionName,
+          createdAt: data.createdAt,
+        })
+      }
       setPhase('results')
       return
     }
@@ -63,7 +72,7 @@ export default function AssessmentPage() {
       }
       setProfessions(list.data)
     }
-    setResult(null)
+    setDisplay(null)
     setPhase('wizard')
   }, [professions])
 
@@ -86,15 +95,37 @@ export default function AssessmentPage() {
     )
   }
 
-  if (phase === 'results' && result) {
-    return <ResultsView result={result} onRetake={() => void startWizard()} />
+  if (phase === 'results' && display) {
+    if (display.kind === 'v2') {
+      return (
+        <ResultsViewV2
+          result={display.result}
+          professionName={display.professionName}
+          createdAt={display.createdAt}
+          onRetake={() => void startWizard()}
+        />
+      )
+    }
+    return (
+      <LegacyResultsView
+        score={display.score}
+        professionName={display.professionName}
+        createdAt={display.createdAt}
+        onRetake={() => void startWizard()}
+      />
+    )
   }
 
   return (
-    <AssessmentWizard
+    <AssessmentWizardV2
       professions={professions}
-      onComplete={(view) => {
-        setResult(view)
+      onComplete={(payload) => {
+        setDisplay({
+          kind: 'v2',
+          result: payload.result,
+          professionName: payload.professionName,
+          createdAt: payload.createdAt,
+        })
         setPhase('results')
       }}
     />

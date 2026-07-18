@@ -21,6 +21,11 @@ export interface Profession {
   name: string
   category: string
   base_risk: number
+  routine_level: number
+  social_level: number
+  creative_level: number
+  physical_level: number
+  llm_exposure: number
 }
 
 export interface Assessment {
