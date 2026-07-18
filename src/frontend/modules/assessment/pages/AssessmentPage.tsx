@@ -8,6 +8,7 @@ import { getLatestAssessment, getProfessions } from '@backend/services/assessmen
 import { AssessmentWizardV2 } from '../components/AssessmentWizardV2'
 import { ResultsViewV2 } from '../components/ResultsViewV2'
 import { LegacyResultsView } from '../components/LegacyResultsView'
+import { AssessmentHistory } from '../components/AssessmentHistory'
 
 type Phase = 'loading' | 'wizard' | 'results' | 'error'
 
@@ -103,24 +104,26 @@ export default function AssessmentPage() {
   }
 
   if (phase === 'results' && display) {
-    if (display.kind === 'v2') {
-      return (
-        <ResultsViewV2
-          assessmentId={display.assessmentId}
-          result={display.result}
-          professionName={display.professionName}
-          createdAt={display.createdAt}
-          onRetake={() => void startWizard()}
-        />
-      )
-    }
     return (
-      <LegacyResultsView
-        score={display.score}
-        professionName={display.professionName}
-        createdAt={display.createdAt}
-        onRetake={() => void startWizard()}
-      />
+      <>
+        {display.kind === 'v2' ? (
+          <ResultsViewV2
+            assessmentId={display.assessmentId}
+            result={display.result}
+            professionName={display.professionName}
+            createdAt={display.createdAt}
+            onRetake={() => void startWizard()}
+          />
+        ) : (
+          <LegacyResultsView
+            score={display.score}
+            professionName={display.professionName}
+            createdAt={display.createdAt}
+            onRetake={() => void startWizard()}
+          />
+        )}
+        <AssessmentHistory />
+      </>
     )
   }
 

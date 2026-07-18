@@ -1,4 +1,6 @@
 import { Card } from '@shared/ui'
+import { pluralRu } from '@shared/plural'
+import { computeStreak } from '@backend/engine/streak'
 import type { JournalEntryView } from '@backend/services/journalService'
 import { moodLabel } from '../moodScale'
 import { average, buildDayStrip, entriesInLastDays } from '../stats'
@@ -25,6 +27,7 @@ export function DayStrip({ entries }: DayStripProps) {
   const cells = buildDayStrip(entries, 14)
   const weekEntries = entriesInLastDays(entries, 7)
   const weekAverage = average(weekEntries.map((entry) => entry.mood))
+  const streak = computeStreak(entries)
 
   return (
     <Card>
@@ -70,6 +73,10 @@ export function DayStrip({ entries }: DayStripProps) {
           </div>
         </div>
       </div>
+
+      <p className="mt-4 text-sm text-muted">
+        Серия: {streak} {pluralRu(streak, 'день', 'дня', 'дней')}
+      </p>
     </Card>
   )
 }

@@ -1,17 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
+import { ArrowDownRight, ArrowUpRight } from 'lucide-react'
 import { Badge, Button, Card } from '@shared/ui'
 import { useAuth } from '@frontend/auth/AuthProvider'
 import { useDocumentTitle } from '@shared/useDocumentTitle'
+import { pluralRu } from '@shared/plural'
 import { getOverview } from '@backend/services/dashboardService'
 import type { OverviewData } from '@backend/services/dashboardService'
-
-function pluralRu(count: number, one: string, few: string, many: string): string {
-  const mod10 = count % 10
-  const mod100 = count % 100
-  if (mod10 === 1 && mod100 !== 11) return one
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few
-  return many
-}
 
 function formatToday(): string {
   const formatted = new Intl.DateTimeFormat('ru-RU', {
@@ -95,14 +89,52 @@ export default function Dashboard() {
             </Button>
           </div>
         ) : data ? (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            <AssessmentCard data={data} />
-            <RoadmapCard data={data} />
-            <TrackerCard data={data} />
-          </div>
+          <>
+            {!data.hasRecentReview ? <WeeklyReviewCard /> : null}
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              <AssessmentCard data={data} />
+              <RoadmapCard data={data} />
+              <TrackerCard data={data} />
+            </div>
+          </>
         ) : null}
       </div>
     </div>
+  )
+}
+
+function WeeklyReviewCard() {
+  return (
+    <Card className="mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <CardTitle>Еженедельный обзор</CardTitle>
+          <p className="mt-1 text-sm text-muted">Пять минут, чтобы увидеть движение за неделю.</p>
+        </div>
+        <Button to="/app/review" variant="accent" size="sm" className="shrink-0">
+          Начать
+        </Button>
+      </div>
+    </Card>
+  )
+}
+
+function DeltaLine({ delta }: { delta: number }) {
+  if (delta === 0) {
+    return <p className="mt-1 text-[13px] text-muted">без изменений</p>
+  }
+  const fell = delta < 0
+  const amount = Math.abs(delta)
+  const word = pluralRu(amount, 'пункт', 'пункта', 'пунктов')
+  return (
+    <p className={`mt-1 flex items-center gap-1 text-[13px] ${fell ? 'text-accent' : 'text-ink'}`}>
+      {fell ? (
+        <ArrowDownRight size={14} strokeWidth={1.75} aria-hidden />
+      ) : (
+        <ArrowUpRight size={14} strokeWidth={1.75} aria-hidden />
+      )}
+      на {amount} {word} {fell ? 'ниже прошлой' : 'выше прошлой'}
+    </p>
   )
 }
 
@@ -115,6 +147,9 @@ function AssessmentCard({ data }: { data: OverviewData }) {
           <div className="mt-4 font-heading text-5xl font-bold tabular-nums text-ink">
             {data.assessment.riskScore}
           </div>
+          {data.assessment.exposureDelta !== null ? (
+            <DeltaLine delta={data.assessment.exposureDelta} />
+          ) : null}
           <p className="mt-1 text-sm text-muted">
             {data.assessment.professionName ?? 'Профессия не указана'}
           </p>
@@ -175,6 +210,9 @@ function TrackerCard({ data }: { data: OverviewData }) {
       <CardTitle>Трекер</CardTitle>
       <p className="mt-4 text-sm text-ink">
         {count} {pluralRu(count, 'запись', 'записи', 'записей')} за неделю
+      </p>
+      <p className="mt-1 text-sm text-muted">
+        Серия: {data.streak} {pluralRu(data.streak, 'день', 'дня', 'дней')}
       </p>
       <Button to="/app/tracker" variant="outline" size="sm" className="mt-4">
         Открыть трекер

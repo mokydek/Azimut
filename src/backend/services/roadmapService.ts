@@ -12,6 +12,7 @@ export interface RoadmapStepView {
   category: string
   orderIndex: number
   isDone: boolean
+  completedAt: string | null
 }
 
 export interface RoadmapView {
@@ -30,13 +31,16 @@ interface RoadmapRow {
     category: string
     order_index: number
     is_done: boolean
+    completed_at: string | null
   }[]
 }
 
 export async function getRoadmapWithSteps(): Promise<ServiceResult<RoadmapView | null>> {
   const { data, error } = await supabase
     .from('roadmaps')
-    .select('id, created_at, roadmap_steps(id, title, description, category, order_index, is_done)')
+    .select(
+      'id, created_at, roadmap_steps(id, title, description, category, order_index, is_done, completed_at)',
+    )
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
@@ -57,6 +61,7 @@ export async function getRoadmapWithSteps(): Promise<ServiceResult<RoadmapView |
       category: step.category,
       orderIndex: step.order_index,
       isDone: step.is_done,
+      completedAt: step.completed_at,
     }))
 
   return { data: { id: row.id, createdAt: row.created_at, steps } }

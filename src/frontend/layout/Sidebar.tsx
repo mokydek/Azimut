@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { Compass, LayoutDashboard, LogOut, NotebookPen, Radar, Route } from 'lucide-react'
+import { BookOpen, Compass, LayoutDashboard, LogOut, NotebookPen, Radar, Route } from 'lucide-react'
 import { useAuth } from '@frontend/auth/AuthProvider'
 import { getProfile } from '@backend/services/profileService'
 
@@ -17,6 +17,7 @@ const navItems: NavItem[] = [
   { to: '/app/assessment', label: 'Диагностика', icon: Radar },
   { to: '/app/roadmap', label: 'План', icon: Route },
   { to: '/app/tracker', label: 'Трекер', icon: NotebookPen },
+  { to: '/app/library', label: 'Библиотека', icon: BookOpen },
 ]
 
 function Wordmark() {

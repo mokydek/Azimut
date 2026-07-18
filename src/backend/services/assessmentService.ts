@@ -127,3 +127,40 @@ export async function getLatestAssessment(): Promise<ServiceResult<LatestAssessm
     },
   }
 }
+
+export interface AssessmentHistoryItem {
+  id: string
+  score: number
+  breakdown: unknown
+  professionName: string | null
+  createdAt: string
+}
+
+interface HistoryRow {
+  id: string
+  risk_score: number
+  breakdown: unknown
+  created_at: string
+  professions: { name: string } | { name: string }[] | null
+}
+
+// All of the user's assessments, newest first, with the joined profession name.
+export async function getHistory(): Promise<ServiceResult<AssessmentHistoryItem[]>> {
+  const { data, error } = await supabase
+    .from('assessments')
+    .select('id, risk_score, breakdown, created_at, professions(name)')
+    .order('created_at', { ascending: false })
+  if (error) {
+    return { error: 'Не удалось загрузить историю' }
+  }
+  const rows = (data as HistoryRow[] | null) ?? []
+  return {
+    data: rows.map((row) => ({
+      id: row.id,
+      score: row.risk_score,
+      breakdown: row.breakdown,
+      professionName: professionName(row.professions),
+      createdAt: row.created_at,
+    })),
+  }
+}

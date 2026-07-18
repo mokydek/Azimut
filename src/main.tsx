@@ -19,6 +19,8 @@ const Dashboard = lazy(() => import('@frontend/pages/Dashboard'))
 const AssessmentPage = lazy(() => import('@frontend/modules/assessment/pages/AssessmentPage'))
 const RoadmapPage = lazy(() => import('@frontend/modules/roadmap/pages/RoadmapPage'))
 const TrackerPage = lazy(() => import('@frontend/modules/tracker/pages/TrackerPage'))
+const ReviewPage = lazy(() => import('@frontend/modules/review/pages/ReviewPage'))
+const LibraryPage = lazy(() => import('@frontend/modules/library/pages/LibraryPage'))
 const NotFound = lazy(() => import('@frontend/pages/NotFound'))
 
 // Warm up the connection to Supabase early. The origin is derived from the env
@@ -64,6 +66,8 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="assessment" element={<AssessmentPage />} />
                 <Route path="roadmap" element={<RoadmapPage />} />
                 <Route path="tracker" element={<TrackerPage />} />
+                <Route path="review" element={<ReviewPage />} />
+                <Route path="library" element={<LibraryPage />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
