@@ -1,10 +1,28 @@
 # Azimut
 
 Azimut is a web service that turns the fear of AI driven job loss into a calm, personal
-adaptation plan. It has three parts: a profession risk assessment that estimates how exposed
-your work is to automation, an adaptation roadmap of durable skills generated from that
-assessment, and a calm tracker, a lightweight mood and reflection journal that helps you see
-your progress over time instead of a sense of chaos.
+adaptation plan. The assessment is built on factor profiles of 178 professions synthesized from
+open automation research, and the result always shows two axes: the external automation
+pressure on the profession and the personal readiness of the user.
+
+## Features
+
+- **Assessment v2**: an adaptive ten step questionnaire (profession picker, task allocation,
+  branch questions that depend on the profession profile, readiness and context blocks). The
+  result is an honest range rather than a single number, plus a readiness score, a quadrant
+  interpretation and a factor breakdown.
+- **Personal AI analysis**: a server side Claude API call writes a short personal review of the
+  answers with concrete recommendations and a calm reframe.
+- **Adaptation roadmap**: a plan of durable skill steps generated from the assessment focus
+  areas, with progress tracking and regeneration when a newer assessment exists.
+- **Calm tracker**: a lightweight mood and reflection journal with a 14 day strip, weekly stats
+  and a consecutive day streak.
+- **Weekly review**: a three step ritual (week summary, focus step for the next week, a short
+  note) offered on the dashboard when no review was saved in the last seven days.
+- **Assessment history and dynamics**: previous assessments are listed on the assessment page,
+  and the dashboard shows how the exposure score moved against the previous assessment.
+- **Library**: a curated catalog of real books, courses and practices grouped by the five
+  roadmap categories, with a recommended section driven by the latest assessment.
 
 ## Stack
 
@@ -25,12 +43,18 @@ your progress over time instead of a sense of chaos.
    ```bash
    cp .env.example .env.local
    ```
-   Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env.local`. Also set
-   `ANTHROPIC_API_KEY` (see the section below) for the personal analysis feature.
-4. Apply the database schema. Open the Supabase SQL Editor for your project and run the files in
-   `supabase/migrations` in order:
-   1. `001_init.sql` (tables, row level security, seeded professions)
-   2. `002_profile_name.sql` (profile name trigger)
+   Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env.local`. `ANTHROPIC_API_KEY`
+   is a server side secret (see the section below).
+4. Apply the database schema. Open the Supabase SQL Editor for your project and run the
+   migrations in order:
+   1. `001_init.sql` — tables, row level security, seeded professions.
+   2. `002_profile_name.sql` — profile name trigger.
+   3. `003_professions_v2.sql` — profession factor profiles for the v2 engine (the
+      `routine_level`, `social_level`, `creative_level`, `physical_level` and `llm_exposure`
+      columns plus the 178 profession rows). Note: this file was applied directly to the
+      project database and is not present in the repository; a fresh database needs these
+      columns and rows before the v2 assessment can run.
+   4. `004_weekly_reviews.sql` — weekly reviews table with owner only policies.
 5. Start the development server:
    ```bash
    npm run dev
@@ -45,20 +69,53 @@ calls the Claude API. It requires a secret `ANTHROPIC_API_KEY`.
   any `VITE_` variable is bundled into the browser build and would leak the key. The function
   reads it from `process.env.ANTHROPIC_API_KEY`.
 - In production, set `ANTHROPIC_API_KEY` in the Vercel project environment variables.
-- For local development, add `ANTHROPIC_API_KEY=...` to `.env.local`. This file is gitignored,
-  so the secret is never committed.
 - The optional `ANTHROPIC_MODEL` variable overrides the model, which defaults to `claude-sonnet-5`.
 
 The Vite dev server (`npm run dev`) serves only the frontend, so `/api/analyze` is not available
-under it. To test the function locally, run the whole app through the Vercel CLI, which serves
-both the static frontend and the serverless function:
+under it. To exercise the function locally, link the project and run it through the Vercel CLI,
+which serves both the static frontend and the serverless function:
 
 ```bash
 npm install -g vercel
+vercel link
 vercel dev
 ```
 
-`vercel dev` reads `.env.local` for `ANTHROPIC_API_KEY` and the Supabase variables.
+Note that `vercel dev` takes the function environment from the linked Vercel project settings,
+not from `.env.local`, and it does not inject `.env.local` into the Vite frontend either. In
+practice: use `npm run dev` for everyday frontend work, and `vercel dev` when you specifically
+need to test the `/api/analyze` routing and authentication.
+
+## Project structure
+
+```
+api/                      Vercel serverless functions (analyze.ts, own tsconfig)
+supabase/migrations/      SQL migrations, run manually in the Supabase SQL Editor
+src/
+  landing/                Public landing page (components + page)
+  frontend/
+    auth/                 AuthProvider, ProtectedRoute, GuestRoute
+    layout/               AppLayout, Sidebar
+    pages/                Dashboard, AuthPage, NotFound
+    modules/
+      assessment/         v2 wizard, results, history, questions
+      roadmap/            Roadmap page and components
+      tracker/            Journal page and components
+      review/             Weekly review flow
+      library/            Resource catalog and page
+  backend/
+    engine/               Pure logic: risk engines v1 and v2, roadmap, streak,
+                          dynamics (no React or Supabase imports), with tests
+    services/             All Supabase calls (auth, assessments, roadmap,
+                          journal, reviews, dashboard, profile, ai)
+    types/                Database row types
+  shared/                 UI kit (Button, Input, Card, Badge, Container),
+                          plural helper, document title hook, global styles
+```
+
+Route level pages are code split with `React.lazy`; every Supabase call lives in
+`src/backend/services`; the scoring engines in `src/backend/engine` are pure and covered by
+Vitest.
 
 ## Scripts
 

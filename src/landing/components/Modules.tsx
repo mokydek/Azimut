@@ -5,12 +5,19 @@ import { Badge, Container } from '@shared/ui'
 function RiskMock() {
   return (
     <div className="rounded-[2px] border border-border p-6">
-      <div className="text-[13px] lowercase tracking-[0.08em] text-muted">уровень риска</div>
-      <div className="mt-2 font-heading text-6xl font-bold tabular-nums text-ink">62</div>
-      <div className="mt-5 h-2 w-full bg-border">
-        <div className="h-full bg-accent" style={{ width: '62%' }} />
+      <div className="text-[13px] lowercase tracking-[0.08em] text-muted">
+        давление автоматизации
       </div>
-      <div className="mt-3 text-[13px] text-muted">Средняя устойчивость профессии</div>
+      <div className="mt-2 font-heading text-6xl font-bold tabular-nums text-ink">62</div>
+      <div className="mt-1 text-[13px] text-muted">от 51 до 73</div>
+      <div className="relative mt-5 h-2 w-full bg-border">
+        <div
+          className="absolute top-0 h-full"
+          style={{ left: '51%', width: '22%', backgroundColor: 'rgba(0, 47, 167, 0.4)' }}
+        />
+        <div className="absolute top-0 h-full w-[2px] bg-ink" style={{ left: '62%' }} />
+      </div>
+      <div className="mt-3 text-[13px] text-muted">Оценка показана диапазоном, а не точкой</div>
     </div>
   )
 }
@@ -72,6 +79,14 @@ function WeekMock() {
         ))}
       </div>
       <div className="mt-3 text-[13px] text-muted">Четыре шага сделаны, один сегодня</div>
+      <div className="mt-4 flex items-center gap-2 border-t border-border pt-4">
+        <div className="flex gap-1">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-2.5 w-2.5 rounded-[2px] bg-accent" />
+          ))}
+        </div>
+        <span className="text-[13px] text-muted">Серия: 5 дней</span>
+      </div>
     </div>
   )
 }
@@ -86,23 +101,23 @@ interface ModuleRow {
 const modules: ModuleRow[] = [
   {
     badge: 'Диагностика',
-    heading: 'Оценка риска',
+    heading: 'Давление и готовность',
     paragraph:
-      'Мы показываем, какие задачи в вашей профессии проще передать машине. Вы видите уровень риска и его причины.',
+      'Две оси вместо одной цифры: внешнее давление автоматизации и ваша личная готовность. Оценка всегда показана честным диапазоном, с разбором причин.',
     mock: <RiskMock />,
   },
   {
     badge: 'План',
-    heading: 'Личный план',
+    heading: 'Разбор и план',
     paragraph:
-      'На основе оценки вы получаете список устойчивых навыков. Каждый шаг понятен и не перегружает.',
+      'На основе ответов ИИ пишет персональный текстовый разбор, а план собирается из конкретных шагов. Каждый шаг понятен и не перегружает.',
     mock: <RoadmapMock />,
   },
   {
     badge: 'Прогресс',
-    heading: 'Спокойный трекер',
+    heading: 'Спокойный ритм',
     paragraph:
-      'Небольшие действия складываются в результат. Дневник помогает опираться на факты, а не на тревогу.',
+      'Дневник, серия дней и еженедельный обзор помогают опираться на факты, а не на тревогу. В библиотеке собраны материалы под ваши зоны роста.',
     mock: <WeekMock />,
   },
 ]
