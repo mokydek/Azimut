@@ -1,21 +1,28 @@
-import { useEffect } from 'react'
-import { supabase } from '@backend/supabaseClient'
+import { useNavigate } from 'react-router-dom'
+import { Button } from '@shared/ui'
+import { useAuth } from '@frontend/auth/AuthProvider'
 
 export default function AppHome() {
-  // TEMPORARY, remove in phase 6: quick check that the Supabase connection works.
-  useEffect(() => {
-    async function checkConnection() {
-      const { count, error } = await supabase
-        .from('professions')
-        .select('*', { count: 'exact' })
-      if (error) {
-        console.error('Supabase connection error:', error.message)
-        return
-      }
-      console.log(`Supabase connected, professions: ${count}`)
-    }
-    void checkConnection()
-  }, [])
+  const navigate = useNavigate()
+  const { signOut } = useAuth()
 
-  return <>Dashboard</>
+  // temporary, replaced by the app shell in phase 6.
+  // Navigate to the landing first so we leave the protected route before the
+  // session clears, otherwise ProtectedRoute redirects to /auth mid sign out.
+  async function handleSignOut() {
+    navigate('/', { replace: true })
+    await signOut()
+  }
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* temporary, replaced by the app shell in phase 6 */}
+      <div className="flex items-center justify-between border-b border-border px-6 py-4">
+        <span className="font-heading text-lg font-bold text-ink">Dashboard</span>
+        <Button variant="outline" onClick={handleSignOut}>
+          Выйти
+        </Button>
+      </div>
+    </div>
+  )
 }

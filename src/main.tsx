@@ -7,27 +7,44 @@ import '@fontsource/archivo/400.css'
 import '@fontsource/archivo/500.css'
 import '@fontsource/archivo/600.css'
 import '@shared/styles/globals.css'
+import { AuthProvider } from '@frontend/auth/AuthProvider'
+import { ProtectedRoute } from '@frontend/auth/ProtectedRoute'
+import { GuestRoute } from '@frontend/auth/GuestRoute'
 
 const LandingPage = lazy(() => import('@landing/pages/LandingPage'))
 const AppHome = lazy(() => import('@frontend/pages/AppHome'))
-// replaced in phase 5
-const AuthPlaceholder = lazy(() => import('@frontend/pages/AuthPlaceholder'))
+const AuthPage = lazy(() => import('@frontend/pages/AuthPage'))
 // internal page, will be removed before deployment
 const Styleguide = lazy(() => import('@frontend/pages/Styleguide'))
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <Suspense fallback={<div style={{ minHeight: '100vh', backgroundColor: '#ffffff' }} />}>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/app" element={<AppHome />} />
-          {/* replaced in phase 5 */}
-          <Route path="/auth" element={<AuthPlaceholder />} />
-          {/* internal page, will be removed before deployment */}
-          <Route path="/styleguide" element={<Styleguide />} />
-        </Routes>
-      </Suspense>
+      <AuthProvider>
+        <Suspense fallback={<div style={{ minHeight: '100vh', backgroundColor: '#ffffff' }} />}>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route
+              path="/app"
+              element={
+                <ProtectedRoute>
+                  <AppHome />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/auth"
+              element={
+                <GuestRoute>
+                  <AuthPage />
+                </GuestRoute>
+              }
+            />
+            {/* internal page, will be removed before deployment */}
+            <Route path="/styleguide" element={<Styleguide />} />
+          </Routes>
+        </Suspense>
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 )
