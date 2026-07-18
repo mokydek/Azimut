@@ -1,8 +1,11 @@
-import { ArrowDownRight, ArrowUpRight } from 'lucide-react'
+import { useState } from 'react'
+import { ArrowDownRight, ArrowUpRight, Sparkles } from 'lucide-react'
 import { Badge, Button, Card } from '@shared/ui'
-import type { QuadrantId, ResultV2 } from '@backend/engine/riskEngineV2'
+import type { AiAnalysis, QuadrantId, ResultV2 } from '@backend/engine/riskEngineV2'
 import { QUADRANT_META } from '@backend/engine/riskEngineV2'
 import type { RiskCategory } from '@backend/engine/riskEngine'
+import { requestAnalysis } from '@backend/services/aiService'
+import { saveAnalysis } from '@backend/services/assessmentService'
 
 const categoryLabels: Record<RiskCategory, string> = {
   low: 'Низкий',
@@ -29,13 +32,108 @@ function formatDate(iso: string): string {
 }
 
 interface ResultsViewV2Props {
+  assessmentId: string
   result: ResultV2
   professionName: string | null
   createdAt: string
   onRetake: () => void
 }
 
-export function ResultsViewV2({ result, professionName, createdAt, onRetake }: ResultsViewV2Props) {
+function PersonalAnalysisCard({
+  assessmentId,
+  initialAi,
+}: {
+  assessmentId: string
+  initialAi?: AiAnalysis
+}) {
+  const [ai, setAi] = useState<AiAnalysis | null>(initialAi ?? null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleRequest() {
+    setLoading(true)
+    setError(null)
+    const result = await requestAnalysis(assessmentId)
+    if ('error' in result) {
+      setLoading(false)
+      setError(result.error)
+      return
+    }
+    await saveAnalysis(assessmentId, result.data)
+    setAi(result.data)
+    setLoading(false)
+  }
+
+  return (
+    <Card className="mt-6">
+      <div className="flex items-center gap-2">
+        <Sparkles size={18} strokeWidth={1.75} className="text-ink" aria-hidden />
+        <h3 className="font-heading text-base font-medium text-ink">Персональный разбор</h3>
+      </div>
+
+      {ai ? (
+        <div className="mt-4">
+          {ai.analysis.split(/\n\n+/).map((paragraph, index) => (
+            <p
+              key={index}
+              className={`text-[15px] leading-[1.6] text-ink ${index > 0 ? 'mt-3' : ''}`}
+            >
+              {paragraph}
+            </p>
+          ))}
+
+          <div className="mt-6 flex flex-col">
+            {ai.recommendations.map((recommendation, index) => (
+              <div
+                key={index}
+                className={`flex gap-4 py-3 ${index > 0 ? 'border-t border-border' : ''}`}
+              >
+                <span className="font-heading text-lg tabular-nums text-muted">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <span className="text-sm text-ink">{recommendation}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 bg-surface p-4">
+            <p className="text-sm text-ink">{ai.reframe}</p>
+          </div>
+        </div>
+      ) : loading ? (
+        <div className="mt-4 flex flex-col gap-3">
+          {[0, 1, 2, 3].map((line) => (
+            <div key={line} className="h-4 w-full animate-pulse rounded-[2px] bg-[#f0f0f0]" />
+          ))}
+        </div>
+      ) : error ? (
+        <div className="mt-4">
+          <p className="text-[13px] text-[#b42318]">{error}</p>
+          <Button variant="ghost" className="mt-2 px-0" onClick={() => void handleRequest()}>
+            Попробовать снова
+          </Button>
+        </div>
+      ) : (
+        <div className="mt-4">
+          <p className="text-sm text-muted">
+            Разбор пишет ИИ на основе ваших ответов. Это занимает около половины минуты.
+          </p>
+          <Button variant="accent" className="mt-4" onClick={() => void handleRequest()}>
+            Получить разбор
+          </Button>
+        </div>
+      )}
+    </Card>
+  )
+}
+
+export function ResultsViewV2({
+  assessmentId,
+  result,
+  professionName,
+  createdAt,
+  onRetake,
+}: ResultsViewV2Props) {
   const { exposureScore, exposureMin, exposureMax, readinessScore, category, quadrant, blocks } =
     result
 
@@ -106,6 +204,8 @@ export function ResultsViewV2({ result, professionName, createdAt, onRetake }: R
           <p className="mt-3 text-sm text-muted">Эта ось полностью в ваших руках.</p>
         </Card>
       </div>
+
+      <PersonalAnalysisCard assessmentId={assessmentId} initialAi={result.ai} />
 
       <Card className="mt-6">
         <h3 className="font-heading text-base font-medium text-ink">Что влияет на оценку</h3>

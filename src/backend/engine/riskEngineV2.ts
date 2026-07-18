@@ -33,6 +33,14 @@ export interface BlockV2 {
   direction: 'up' | 'down'
 }
 
+// AI generated personal analysis, merged into the stored breakdown by the
+// serverless function flow (phase 15). Optional: absent until requested.
+export interface AiAnalysis {
+  analysis: string
+  recommendations: string[]
+  reframe: string
+}
+
 export interface ResultV2 {
   version: 2
   exposureScore: number
@@ -42,6 +50,7 @@ export interface ResultV2 {
   category: RiskCategory
   quadrant: QuadrantId
   blocks: BlockV2[]
+  ai?: AiAnalysis
 }
 
 export interface QuadrantContent {

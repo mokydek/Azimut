@@ -12,7 +12,13 @@ import { LegacyResultsView } from '../components/LegacyResultsView'
 type Phase = 'loading' | 'wizard' | 'results' | 'error'
 
 type Display =
-  | { kind: 'v2'; result: ResultV2; professionName: string | null; createdAt: string }
+  | {
+      kind: 'v2'
+      assessmentId: string
+      result: ResultV2
+      professionName: string | null
+      createdAt: string
+    }
   | { kind: 'legacy'; score: number; professionName: string | null; createdAt: string }
 
 export default function AssessmentPage() {
@@ -34,6 +40,7 @@ export default function AssessmentPage() {
       if (isResultV2(data.breakdown)) {
         setDisplay({
           kind: 'v2',
+          assessmentId: data.id,
           result: data.breakdown,
           professionName: data.professionName,
           createdAt: data.createdAt,
@@ -99,6 +106,7 @@ export default function AssessmentPage() {
     if (display.kind === 'v2') {
       return (
         <ResultsViewV2
+          assessmentId={display.assessmentId}
           result={display.result}
           professionName={display.professionName}
           createdAt={display.createdAt}
@@ -122,6 +130,7 @@ export default function AssessmentPage() {
       onComplete={(payload) => {
         setDisplay({
           kind: 'v2',
+          assessmentId: payload.assessmentId,
           result: payload.result,
           professionName: payload.professionName,
           createdAt: payload.createdAt,

@@ -38,6 +38,7 @@ interface WizardState {
 }
 
 export interface WizardCompletePayload {
+  assessmentId: string
   result: ResultV2
   professionName: string
   createdAt: string
@@ -170,7 +171,12 @@ export function AssessmentWizardV2({ professions, onComplete }: AssessmentWizard
       return
     }
 
-    onComplete({ result, professionName: profession.name, createdAt: new Date().toISOString() })
+    onComplete({
+      assessmentId: saved.data.id,
+      result,
+      professionName: profession.name,
+      createdAt: new Date().toISOString(),
+    })
   }
 
   function goNext() {

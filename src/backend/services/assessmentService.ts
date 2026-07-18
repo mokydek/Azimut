@@ -1,5 +1,5 @@
 import type { Profession } from '@backend/types/database'
-import type { AnswersV2, ResultV2 } from '@backend/engine/riskEngineV2'
+import type { AiAnalysis, AnswersV2, ResultV2 } from '@backend/engine/riskEngineV2'
 import { supabase } from '@backend/supabaseClient'
 import type { ServiceResult } from './result'
 
@@ -13,6 +13,7 @@ export interface SaveAssessmentInput {
 // answers and breakdown are jsonb and may be either the v1 or v2 shape. Callers
 // narrow with the version guards from the engine.
 export interface LatestAssessment {
+  id: string
   score: number
   answers: unknown
   breakdown: unknown
@@ -21,6 +22,7 @@ export interface LatestAssessment {
 }
 
 interface LatestAssessmentRow {
+  id: string
   risk_score: number
   answers: unknown
   breakdown: unknown
@@ -48,22 +50,53 @@ export async function getProfessions(): Promise<ServiceResult<Profession[]>> {
   return { data: (data as Profession[] | null) ?? [] }
 }
 
-export async function saveAssessment(input: SaveAssessmentInput): Promise<ServiceResult<null>> {
+export async function saveAssessment(
+  input: SaveAssessmentInput,
+): Promise<ServiceResult<{ id: string }>> {
   const { data: userData } = await supabase.auth.getUser()
   const userId = userData.user?.id
   if (!userId) {
     return { error: 'Нужно войти в систему' }
   }
 
-  const { error } = await supabase.from('assessments').insert({
-    user_id: userId,
-    profession_id: input.professionId,
-    answers: input.answers,
-    risk_score: input.riskScore,
-    breakdown: input.breakdown,
-  })
-  if (error) {
+  const { data, error } = await supabase
+    .from('assessments')
+    .insert({
+      user_id: userId,
+      profession_id: input.professionId,
+      answers: input.answers,
+      risk_score: input.riskScore,
+      breakdown: input.breakdown,
+    })
+    .select('id')
+    .single()
+  if (error || !data) {
     return { error: 'Не удалось сохранить результат' }
+  }
+  return { data: { id: (data as { id: string }).id } }
+}
+
+// Merges the AI analysis into the assessment's stored breakdown jsonb.
+export async function saveAnalysis(
+  assessmentId: string,
+  ai: AiAnalysis,
+): Promise<ServiceResult<null>> {
+  const { data, error } = await supabase
+    .from('assessments')
+    .select('breakdown')
+    .eq('id', assessmentId)
+    .single()
+  if (error || !data) {
+    return { error: 'Не удалось сохранить разбор' }
+  }
+
+  const current = (data as { breakdown: Record<string, unknown> | null }).breakdown ?? {}
+  const { error: updateError } = await supabase
+    .from('assessments')
+    .update({ breakdown: { ...current, ai } })
+    .eq('id', assessmentId)
+  if (updateError) {
+    return { error: 'Не удалось сохранить разбор' }
   }
   return { data: null }
 }
@@ -71,7 +104,7 @@ export async function saveAssessment(input: SaveAssessmentInput): Promise<Servic
 export async function getLatestAssessment(): Promise<ServiceResult<LatestAssessment | null>> {
   const { data, error } = await supabase
     .from('assessments')
-    .select('risk_score, answers, breakdown, created_at, professions(name)')
+    .select('id, risk_score, answers, breakdown, created_at, professions(name)')
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
@@ -85,6 +118,7 @@ export async function getLatestAssessment(): Promise<ServiceResult<LatestAssessm
   const row = data as LatestAssessmentRow
   return {
     data: {
+      id: row.id,
       score: row.risk_score,
       answers: row.answers,
       breakdown: row.breakdown,
